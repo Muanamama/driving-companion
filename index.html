@@ -1,0 +1,788 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0d0d0d">
+  <title>Driving Companion</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #0d0d0d;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 24px 18px 18px;
+      gap: 12px;
+    }
+
+    /* ── Clock ── */
+    #clock-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    #time {
+      font-size: clamp(64px, 18vw, 110px);
+      font-weight: 200;
+      letter-spacing: -3px;
+      color: #fff;
+      line-height: 1;
+    }
+
+    #day {
+      font-size: clamp(15px, 3.5vw, 22px);
+      color: #666;
+      font-weight: 300;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    #date {
+      font-size: clamp(13px, 3vw, 17px);
+      color: #3a3a3a;
+      font-weight: 300;
+    }
+
+    /* ── Weather ── */
+    #weather-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 12px 18px;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      flex-shrink: 0;
+      min-height: 58px;
+    }
+
+    #weather-icon { font-size: 26px; line-height: 1; }
+
+    #weather-main { display: flex; flex-direction: column; gap: 1px; }
+
+    #weather-temp {
+      font-size: clamp(20px, 4.5vw, 26px);
+      font-weight: 300;
+      color: #fff;
+      line-height: 1;
+    }
+
+    #weather-desc { font-size: 12px; color: #555; text-transform: capitalize; }
+
+    #weather-extra {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-left: 1px solid #2a2a2a;
+      padding-left: 16px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    #weather-loading { font-size: 13px; color: #3a3a3a; }
+
+    /* ── Divider ── */
+    .divider {
+      width: 36px;
+      height: 1px;
+      background: #1e1e1e;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    /* ── Spotify Panel ── */
+    #spotify-panel {
+      flex: 1;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* Login state */
+    #spotify-login {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 16px;
+      padding: 24px;
+    }
+
+    #spotify-login svg { opacity: 0.4; }
+
+    #spotify-login p {
+      font-size: 14px;
+      color: #444;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    #login-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1DB954;
+      color: #000;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+
+    #login-btn:active { background: #17a349; }
+
+    /* Player state */
+    #spotify-player {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    #spotify-player.visible { display: flex; }
+
+    /* Album art + track info */
+    #track-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px 14px;
+      flex-shrink: 0;
+    }
+
+    #album-art {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      background: #1e1e1e;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    #album-art-placeholder {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      background: #1e1e1e;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #track-info { flex: 1; min-width: 0; }
+
+    #track-name {
+      font-size: clamp(15px, 3.5vw, 18px);
+      font-weight: 500;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #track-artist {
+      font-size: clamp(12px, 2.8vw, 14px);
+      color: #666;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 3px;
+    }
+
+    /* Progress bar */
+    #progress-area {
+      padding: 0 20px 14px;
+      flex-shrink: 0;
+    }
+
+    #progress-bar-bg {
+      width: 100%;
+      height: 3px;
+      background: #2a2a2a;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    #progress-bar-fill {
+      height: 100%;
+      background: #1DB954;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 1s linear;
+    }
+
+    #progress-times {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #3a3a3a;
+    }
+
+    /* Controls */
+    #controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 0 12px 18px;
+      flex-shrink: 0;
+    }
+
+    .ctrl-btn {
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      padding: 12px 18px;
+      border-radius: 12px;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.1s, background 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .ctrl-btn:active { background: #1e1e1e; color: #fff; }
+
+    #play-btn {
+      color: #fff;
+      background: #1DB954;
+      border-radius: 50%;
+      width: 64px;
+      height: 64px;
+      flex: none;
+      padding: 0;
+      margin: 0 8px;
+    }
+
+    #play-btn:active { background: #17a349; }
+
+    #play-btn svg, .ctrl-btn svg { display: block; }
+
+    /* Queue / Up next */
+    #queue-area {
+      flex: 1;
+      overflow-y: auto;
+      border-top: 1px solid #1a1a1a;
+      min-height: 0;
+    }
+
+    #queue-label {
+      font-size: 10px;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 10px 20px 6px;
+    }
+
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 20px;
+    }
+
+    .queue-item img {
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      background: #1e1e1e;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .queue-item-info { flex: 1; min-width: 0; }
+
+    .queue-item-name {
+      font-size: 13px;
+      color: #aaa;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .queue-item-artist {
+      font-size: 11px;
+      color: #444;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Error / no playback */
+    #no-playback {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 10px;
+      padding: 24px;
+    }
+
+    #no-playback p { font-size: 14px; color: #444; text-align: center; line-height: 1.6; }
+
+    #footer {
+      font-size: 11px;
+      color: #1e1e1e;
+      text-align: center;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <div id="clock-block">
+    <div id="time">00:00</div>
+    <div id="day">Sunday</div>
+    <div id="date">27 April 2026</div>
+  </div>
+
+  <div id="weather-strip">
+    <span id="weather-loading">Fetching weather…</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div id="spotify-panel">
+
+    <!-- Login -->
+    <div id="spotify-login">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="24" fill="#1DB954"/>
+        <path d="M14 21C19 18.5 29 18.5 34 21" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M15 25.5C20 23.5 28 23.5 33 25.5" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M16.5 30C21 28.5 27 28.5 31.5 30" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <p>Connect Spotify to see what's playing and control your music.</p>
+      <a id="login-btn" href="#">
+        <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="24" fill="none"/>
+          <path d="M14 21C19 18.5 29 18.5 34 21" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+          <path d="M15 25.5C20 23.5 28 23.5 33 25.5" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+          <path d="M16.5 30C21 28.5 27 28.5 31.5 30" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        Connect Spotify
+      </a>
+    </div>
+
+    <!-- Player -->
+    <div id="spotify-player">
+      <div id="track-area">
+        <div id="album-art-placeholder">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3" stroke="#333" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <img id="album-art" style="display:none" alt="Album art"/>
+        <div id="track-info">
+          <div id="track-name">Not playing</div>
+          <div id="track-artist">—</div>
+        </div>
+      </div>
+
+      <div id="progress-area">
+        <div id="progress-bar-bg">
+          <div id="progress-bar-fill"></div>
+        </div>
+        <div id="progress-times">
+          <span id="prog-elapsed">0:00</span>
+          <span id="prog-duration">0:00</span>
+        </div>
+      </div>
+
+      <div id="controls">
+        <button class="ctrl-btn" id="prev-btn" aria-label="Previous">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+          </svg>
+        </button>
+        <button id="play-btn" aria-label="Play/Pause">
+          <svg id="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="white">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <svg id="pause-icon" width="28" height="28" viewBox="0 0 24 24" fill="white" style="display:none">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+          </svg>
+        </button>
+        <button class="ctrl-btn" id="next-btn" aria-label="Next">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="queue-area">
+        <div id="queue-label">Up next</div>
+        <div id="queue-list"></div>
+      </div>
+    </div>
+
+    <!-- No playback -->
+    <div id="no-playback">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1.5"/>
+        <path d="M10 9l5 3-5 3V9z" fill="#333"/>
+      </svg>
+      <p>Open Spotify on your device and start playing something.</p>
+    </div>
+
+  </div>
+
+  <div id="footer">Safe travels</div>
+</div>
+
+<script>
+  /* ════════════════════════════════
+     CLOCK
+  ════════════════════════════════ */
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('time').textContent = h + ':' + m;
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('day').textContent = days[now.getDay()];
+    document.getElementById('date').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  /* ════════════════════════════════
+     WEATHER (Open-Meteo API)
+  ════════════════════════════════ */
+  const WMO = {
+    0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+    45:'Foggy', 48:'Icy fog', 51:'Light drizzle', 53:'Drizzle', 55:'Heavy drizzle',
+    61:'Light rain', 63:'Rain', 65:'Heavy rain', 71:'Light snow', 73:'Snow',
+    75:'Heavy snow', 80:'Light showers', 81:'Showers', 82:'Heavy showers',
+    95:'Thunderstorm', 96:'Thunderstorm + hail', 99:'Severe thunderstorm'
+  };
+
+  function wmoIcon(code, isDay) {
+    if (code===0) return isDay?'☀️':'🌙';
+    if (code<=2) return isDay?'🌤️':'🌥️';
+    if (code===3) return '☁️';
+    if (code<=48) return '🌫️';
+    if (code<=55) return '🌦️';
+    if (code<=65) return '🌧️';
+    if (code<=75) return '❄️';
+    if (code<=82) return '🌧️';
+    return '⛈️';
+  }
+
+  function fetchWeather(lat, lon) {
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&wind_speed_unit=kmh&timezone=auto`)
+      .then(r => r.json())
+      .then(data => {
+        const c = data.current;
+        const strip = document.getElementById('weather-strip');
+        if (!strip) return;
+        strip.innerHTML = `
+          <span id="weather-icon">${wmoIcon(c.weather_code, c.is_day)}</span>
+          <div id="weather-main">
+            <span id="weather-temp">${Math.round(c.temperature_2m)}°C</span>
+            <span id="weather-desc">${WMO[c.weather_code] || '—'}</span>
+          </div>
+          <div id="weather-extra">
+            <span>Feels like ${Math.round(c.apparent_temperature)}°C</span>
+            <span>Wind ${Math.round(c.wind_speed_10m)} km/h</span>
+          </div>`;
+      })
+      .catch(() => {
+        const strip = document.getElementById('weather-strip');
+        if (strip) strip.innerHTML = '<span id="weather-loading" style="color:#333">Weather unavailable</span>';
+      });
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      p => fetchWeather(p.coords.latitude, p.coords.longitude),
+      () => fetchWeather(53.0793, 8.8017)
+    );
+  } else {
+    fetchWeather(53.0793, 8.8017);
+  }
+
+  /* ════════════════════════════════
+     SPOTIFY AUTH (PKCE FLOW)
+  ════════════════════════════════ */
+  const CLIENT_ID = '79e6f32c86d54acb96f8b62437735e8a';
+  const REDIRECT_URI = 'https://muanamama.github.io/driving-companion';
+  const SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing';
+
+  function randomStr(len) {
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let text = '';
+    for (let i = 0; i < len; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+  }
+
+  async function sha256(plain) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plain);
+    return window.crypto.subtle.digest('SHA-256', data);
+  }
+
+  function base64urlencode(a) {
+    return btoa(String.fromCharCode.apply(null, new Uint8Array(a)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  async function startLogin() {
+    const codeVerifier = randomStr(128);
+    const hashed = await sha256(codeVerifier);
+    const codeChallenge = base64urlencode(hashed);
+
+    localStorage.setItem('pkce_verifier', codeVerifier);
+
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      code_challenge_method: 'S256',
+      code_challenge: codeChallenge,
+      redirect_uri: REDIRECT_URI,
+    });
+
+    window.location.href = 'https://accounts.spotify.com/authorize?' + params.toString();
+  }
+
+  async function exchangeCode(code) {
+    const codeVerifier = localStorage.getItem('pkce_verifier');
+
+    const res = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: CLIENT_ID,
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: REDIRECT_URI,
+        code_verifier: codeVerifier,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.access_token) {
+      saveTokens(data);
+      window.history.replaceState({}, document.title, REDIRECT_URI);
+      initPlayer();
+    }
+  }
+
+  async function refreshToken() {
+    const refresh_token = localStorage.getItem('spotify_refresh');
+    if (!refresh_token) return null;
+
+    const res = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: CLIENT_ID,
+        grant_type: 'refresh_token',
+        refresh_token: refresh_token,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.access_token) {
+      saveTokens(data);
+      return data.access_token;
+    }
+    return null;
+  }
+
+  function saveTokens(data) {
+    localStorage.setItem('spotify_token', data.access_token);
+    localStorage.setItem('spotify_expires', (Date.now() + (data.expires_in * 1000)).toString());
+    if (data.refresh_token) localStorage.setItem('spotify_refresh', data.refresh_token);
+  }
+
+  async function getToken() {
+    const expiration = localStorage.getItem('spotify_expires');
+    if (expiration && Date.now() < parseInt(expiration) - 60000) {
+      return localStorage.getItem('spotify_token');
+    }
+    return await refreshToken();
+  }
+
+  /* ════════════════════════════════
+     SPOTIFY PLAYER LOGIC
+  ════════════════════════════════ */
+  let isPlaying = false;
+  let pollInterval = null;
+  let currentProgress = 0;
+  let currentDuration = 0;
+
+  async function spotifyApi(method, path, body = null) {
+    const token = await getToken();
+    if (!token) { showLogin(); return null; }
+
+    const options = {
+      method,
+      headers: { 'Authorization': `Bearer ${token}` }
+    };
+    if (body) {
+      options.headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
+
+    const res = await fetch(`https://api.spotify.com/v1${path}`, options);
+    if (res.status === 401) { showLogin(); return null; }
+    if (res.status === 204) return {}; 
+    return res.json().catch(() => ({}));
+  }
+
+  function fmtMs(ms) {
+    const s = Math.floor(ms / 1000);
+    const min = Math.floor(s / 60);
+    const sec = String(s % 60).padStart(2, '0');
+    return `${min}:${sec}`;
+  }
+
+  async function pollPlayback() {
+    try {
+      const data = await spotifyApi('GET', '/me/player');
+      if (!data || !data.item) {
+        showNoPlayback();
+        return;
+      }
+      showPlayer();
+      isPlaying = data.is_playing;
+      currentProgress = data.progress_ms;
+      currentDuration = data.item.duration_ms;
+
+      document.getElementById('track-name').textContent = data.item.name;
+      document.getElementById('track-artist').textContent = data.item.artists.map(a => a.name).join(', ');
+      
+      const art = data.item.album.images[0].url;
+      const albumImg = document.getElementById('album-art');
+      albumImg.src = art;
+      albumImg.style.display = 'block';
+      document.getElementById('album-art-placeholder').style.display = 'none';
+
+      document.getElementById('play-icon').style.display = isPlaying ? 'none' : 'block';
+      document.getElementById('pause-icon').style.display = isPlaying ? 'block' : 'none';
+
+      const pct = (currentProgress / currentDuration) * 100;
+      document.getElementById('progress-bar-fill').style.width = pct + '%';
+      document.getElementById('prog-elapsed').textContent = fmtMs(currentProgress);
+      document.getElementById('prog-duration').textContent = fmtMs(currentDuration);
+
+      renderQueue();
+    } catch (e) {
+      console.error("Playback poll failed", e);
+    }
+  }
+
+  async function renderQueue() {
+    const data = await spotifyApi('GET', '/me/player/queue');
+    if (!data || !data.queue) return;
+    const list = document.getElementById('queue-list');
+    list.innerHTML = '';
+    data.queue.slice(0, 4).forEach(item => {
+      const img = item.album.images[1]?.url || item.album.images[0].url;
+      const div = document.createElement('div');
+      div.className = 'queue-item';
+      div.innerHTML = `
+        <img src="${img}" alt="">
+        <div class="queue-item-info">
+          <div class="queue-item-name">${item.name}</div>
+          <div class="queue-item-artist">${item.artists[0].name}</div>
+        </div>`;
+      list.appendChild(div);
+    });
+  }
+
+  function initPlayer() {
+    pollPlayback();
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(pollPlayback, 3000);
+  }
+
+  function showLogin() {
+    document.getElementById('spotify-login').style.display = 'flex';
+    document.getElementById('spotify-player').classList.remove('visible');
+    document.getElementById('no-playback').style.display = 'none';
+  }
+
+  function showPlayer() {
+    document.getElementById('spotify-login').style.display = 'none';
+    document.getElementById('spotify-player').classList.add('visible');
+    document.getElementById('no-playback').style.display = 'none';
+  }
+
+  function showNoPlayback() {
+    document.getElementById('spotify-player').classList.remove('visible');
+    document.getElementById('no-playback').style.display = 'flex';
+  }
+
+  document.getElementById('login-btn').addEventListener('click', (e) => {
+    e.preventDefault();
+    startLogin();
+  });
+
+  document.getElementById('play-btn').addEventListener('click', async () => {
+    await spotifyApi('PUT', isPlaying ? '/me/player/pause' : '/me/player/play');
+    setTimeout(pollPlayback, 500);
+  });
+
+  document.getElementById('next-btn').addEventListener('click', async () => {
+    await spotifyApi('POST', '/me/player/next');
+    setTimeout(pollPlayback, 500);
+  });
+
+  document.getElementById('prev-btn').addEventListener('click', async () => {
+    await spotifyApi('POST', '/me/player/previous');
+    setTimeout(pollPlayback, 500);
+  });
+
+  (async function boot() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+
+    if (code) {
+      await exchangeCode(code);
+    } else {
+      const token = await getToken();
+      if (token) initPlayer();
+      else showLogin();
+    }
+  })();
+</script>
+</body>
+</html>
