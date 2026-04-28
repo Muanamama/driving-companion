@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0d0d0d">
   <title>Driving Companion</title>
+  <link rel="manifest" href="manifest.json">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -54,7 +54,7 @@
 
     #date {
       font-size: clamp(13px, 3vw, 17px);
-      color: #3a3a3a;
+      color: #888;
       font-weight: 300;
     }
 
@@ -83,7 +83,7 @@
       line-height: 1;
     }
 
-    #weather-desc { font-size: 12px; color: #555; text-transform: capitalize; }
+    #weather-desc { font-size: 12px; color: #999; text-transform: capitalize; }
 
     #weather-extra {
       display: flex;
@@ -92,10 +92,10 @@
       border-left: 1px solid #2a2a2a;
       padding-left: 16px;
       font-size: 12px;
-      color: #555;
+      color: #999;
     }
 
-    #weather-loading { font-size: 13px; color: #3a3a3a; }
+    #weather-loading { font-size: 13px; color: #888; }
 
     /* ── Divider ── */
     .divider {
@@ -422,11 +422,13 @@
       </div>
 
       <div id="controls">
+        <!-- Previous -->
         <button class="ctrl-btn" id="prev-btn" aria-label="Previous">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
           </svg>
         </button>
+        <!-- Play/Pause -->
         <button id="play-btn" aria-label="Play/Pause">
           <svg id="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="white">
             <path d="M8 5v14l11-7z"/>
@@ -435,6 +437,7 @@
             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
           </svg>
         </button>
+        <!-- Next -->
         <button class="ctrl-btn" id="next-btn" aria-label="Next">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/>
@@ -480,16 +483,15 @@
   setInterval(updateClock, 1000);
 
   /* ════════════════════════════════
-     WEATHER (Open-Meteo API)
+     WEATHER
   ════════════════════════════════ */
   const WMO = {
-    0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
-    45:'Foggy', 48:'Icy fog', 51:'Light drizzle', 53:'Drizzle', 55:'Heavy drizzle',
-    61:'Light rain', 63:'Rain', 65:'Heavy rain', 71:'Light snow', 73:'Snow',
-    75:'Heavy snow', 80:'Light showers', 81:'Showers', 82:'Heavy showers',
-    95:'Thunderstorm', 96:'Thunderstorm + hail', 99:'Severe thunderstorm'
+    0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+    45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+    61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',
+    75:'Heavy snow',80:'Light showers',81:'Showers',82:'Heavy showers',
+    95:'Thunderstorm',96:'Thunderstorm + hail',99:'Severe thunderstorm'
   };
-
   function wmoIcon(code, isDay) {
     if (code===0) return isDay?'☀️':'🌙';
     if (code<=2) return isDay?'🌤️':'🌥️';
@@ -501,212 +503,178 @@
     if (code<=82) return '🌧️';
     return '⛈️';
   }
-
+  function renderWeather(data) {
+    const c = data.current;
+    const strip = document.getElementById('weather-strip');
+    strip.innerHTML = `
+      <span id="weather-icon">${wmoIcon(c.weather_code, c.is_day)}</span>
+      <div id="weather-main">
+        <span id="weather-temp">${Math.round(c.temperature_2m)}°C</span>
+        <span id="weather-desc">${WMO[c.weather_code]||'—'}</span>
+      </div>
+      <div id="weather-extra">
+        <span>Feels like ${Math.round(c.apparent_temperature)}°C</span>
+        <span>Wind ${Math.round(c.wind_speed_10m)} km/h</span>
+      </div>`;
+  }
   function fetchWeather(lat, lon) {
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&wind_speed_unit=kmh&timezone=auto`)
-      .then(r => r.json())
-      .then(data => {
-        const c = data.current;
-        const strip = document.getElementById('weather-strip');
-        if (!strip) return;
-        strip.innerHTML = `
-          <span id="weather-icon">${wmoIcon(c.weather_code, c.is_day)}</span>
-          <div id="weather-main">
-            <span id="weather-temp">${Math.round(c.temperature_2m)}°C</span>
-            <span id="weather-desc">${WMO[c.weather_code] || '—'}</span>
-          </div>
-          <div id="weather-extra">
-            <span>Feels like ${Math.round(c.apparent_temperature)}°C</span>
-            <span>Wind ${Math.round(c.wind_speed_10m)} km/h</span>
-          </div>`;
-      })
-      .catch(() => {
-        const strip = document.getElementById('weather-strip');
-        if (strip) strip.innerHTML = '<span id="weather-loading" style="color:#333">Weather unavailable</span>';
-      });
+      .then(r=>r.json()).then(renderWeather)
+      .catch(()=>{ document.getElementById('weather-strip').innerHTML='<span id="weather-loading" style="color:#333">Weather unavailable</span>'; });
   }
-
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      p => fetchWeather(p.coords.latitude, p.coords.longitude),
-      () => fetchWeather(53.0793, 8.8017)
+      p=>fetchWeather(p.coords.latitude, p.coords.longitude),
+      ()=>fetchWeather(53.0793, 8.8017)
     );
-  } else {
-    fetchWeather(53.0793, 8.8017);
-  }
+  } else { fetchWeather(53.0793, 8.8017); }
 
   /* ════════════════════════════════
-     SPOTIFY AUTH (PKCE FLOW)
+     SPOTIFY AUTH (PKCE)
   ════════════════════════════════ */
   const CLIENT_ID = '79e6f32c86d54acb96f8b62437735e8a';
   const REDIRECT_URI = 'https://muanamama.github.io/driving-companion';
   const SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing';
 
   function randomStr(len) {
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let text = '';
-    for (let i = 0; i < len; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
+    const arr = new Uint8Array(len);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('').slice(0, len);
   }
 
   async function sha256(plain) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(plain);
-    return window.crypto.subtle.digest('SHA-256', data);
+    const enc = new TextEncoder().encode(plain);
+    const hash = await crypto.subtle.digest('SHA-256', enc);
+    return hash;
   }
 
-  function base64urlencode(a) {
-    return btoa(String.fromCharCode.apply(null, new Uint8Array(a)))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  function base64urlencode(buf) {
+    return btoa(String.fromCharCode(...new Uint8Array(buf)))
+      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
 
   async function startLogin() {
-    const codeVerifier = randomStr(128);
-    const hashed = await sha256(codeVerifier);
-    const codeChallenge = base64urlencode(hashed);
-
-    localStorage.setItem('pkce_verifier', codeVerifier);
-
+    const verifier = randomStr(64);
+    const hashed = await sha256(verifier);
+    const challenge = base64urlencode(hashed);
+    localStorage.setItem('pkce_verifier', verifier);
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: CLIENT_ID,
       scope: SCOPES,
-      code_challenge_method: 'S256',
-      code_challenge: codeChallenge,
       redirect_uri: REDIRECT_URI,
+      code_challenge_method: 'S256',
+      code_challenge: challenge
     });
-
-    window.location.href = 'https://accounts.spotify.com/authorize?' + params.toString();
+    window.location = 'https://accounts.spotify.com/authorize?' + params;
   }
 
   async function exchangeCode(code) {
-    const codeVerifier = localStorage.getItem('pkce_verifier');
-
+    const verifier = localStorage.getItem('pkce_verifier');
     const res = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: CLIENT_ID,
         grant_type: 'authorization_code',
-        code: code,
+        code,
         redirect_uri: REDIRECT_URI,
-        code_verifier: codeVerifier,
-      }),
+        client_id: CLIENT_ID,
+        code_verifier: verifier
+      })
     });
-
     const data = await res.json();
     if (data.access_token) {
       saveTokens(data);
-      window.history.replaceState({}, document.title, REDIRECT_URI);
+      window.history.replaceState({}, '', REDIRECT_URI);
       initPlayer();
     }
   }
 
   async function refreshToken() {
-    const refresh_token = localStorage.getItem('spotify_refresh');
-    if (!refresh_token) return null;
-
+    const rt = localStorage.getItem('spotify_refresh');
+    if (!rt) return null;
     const res = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: CLIENT_ID,
         grant_type: 'refresh_token',
-        refresh_token: refresh_token,
-      }),
+        refresh_token: rt,
+        client_id: CLIENT_ID
+      })
     });
-
     const data = await res.json();
-    if (data.access_token) {
-      saveTokens(data);
-      return data.access_token;
-    }
+    if (data.access_token) { saveTokens(data); return data.access_token; }
     return null;
   }
 
   function saveTokens(data) {
     localStorage.setItem('spotify_token', data.access_token);
-    localStorage.setItem('spotify_expires', (Date.now() + (data.expires_in * 1000)).toString());
+    localStorage.setItem('spotify_expires', Date.now() + (data.expires_in - 60) * 1000);
     if (data.refresh_token) localStorage.setItem('spotify_refresh', data.refresh_token);
   }
 
   async function getToken() {
-    const expiration = localStorage.getItem('spotify_expires');
-    if (expiration && Date.now() < parseInt(expiration) - 60000) {
-      return localStorage.getItem('spotify_token');
-    }
+    const exp = parseInt(localStorage.getItem('spotify_expires') || '0');
+    if (Date.now() < exp) return localStorage.getItem('spotify_token');
     return await refreshToken();
   }
 
   /* ════════════════════════════════
-     SPOTIFY PLAYER LOGIC
+     SPOTIFY PLAYER
   ════════════════════════════════ */
   let isPlaying = false;
   let pollInterval = null;
+  let progressInterval = null;
   let currentProgress = 0;
   let currentDuration = 0;
 
-  async function spotifyApi(method, path, body = null) {
+  async function spotifyApi(method, path, body) {
     const token = await getToken();
     if (!token) { showLogin(); return null; }
-
-    const options = {
-      method,
-      headers: { 'Authorization': `Bearer ${token}` }
-    };
-    if (body) {
-      options.headers['Content-Type'] = 'application/json';
-      options.body = JSON.stringify(body);
-    }
-
-    const res = await fetch(`https://api.spotify.com/v1${path}`, options);
+    const opts = { method, headers: { Authorization: 'Bearer ' + token } };
+    if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+    const res = await fetch('https://api.spotify.com/v1' + path, opts);
     if (res.status === 401) { showLogin(); return null; }
-    if (res.status === 204) return {}; 
-    return res.json().catch(() => ({}));
+    if (res.status === 204 || res.status === 202) return {};
+    if (!res.ok) return null;
+    return res.json().catch(()=>({}));
   }
 
   function fmtMs(ms) {
-    const s = Math.floor(ms / 1000);
-    const min = Math.floor(s / 60);
-    const sec = String(s % 60).padStart(2, '0');
-    return `${min}:${sec}`;
+    const s = Math.floor(ms/1000);
+    return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
   }
 
-  async function pollPlayback() {
-    try {
-      const data = await spotifyApi('GET', '/me/player');
-      if (!data || !data.item) {
-        showNoPlayback();
-        return;
-      }
-      showPlayer();
-      isPlaying = data.is_playing;
-      currentProgress = data.progress_ms;
-      currentDuration = data.item.duration_ms;
+  function updateProgress() {
+    if (!isPlaying) return;
+    currentProgress = Math.min(currentProgress + 1000, currentDuration);
+    const pct = currentDuration > 0 ? (currentProgress / currentDuration * 100) : 0;
+    document.getElementById('progress-bar-fill').style.width = pct + '%';
+    document.getElementById('prog-elapsed').textContent = fmtMs(currentProgress);
+  }
 
-      document.getElementById('track-name').textContent = data.item.name;
-      document.getElementById('track-artist').textContent = data.item.artists.map(a => a.name).join(', ');
-      
-      const art = data.item.album.images[0].url;
-      const albumImg = document.getElementById('album-art');
-      albumImg.src = art;
-      albumImg.style.display = 'block';
-      document.getElementById('album-art-placeholder').style.display = 'none';
-
-      document.getElementById('play-icon').style.display = isPlaying ? 'none' : 'block';
-      document.getElementById('pause-icon').style.display = isPlaying ? 'block' : 'none';
-
-      const pct = (currentProgress / currentDuration) * 100;
-      document.getElementById('progress-bar-fill').style.width = pct + '%';
-      document.getElementById('prog-elapsed').textContent = fmtMs(currentProgress);
-      document.getElementById('prog-duration').textContent = fmtMs(currentDuration);
-
-      renderQueue();
-    } catch (e) {
-      console.error("Playback poll failed", e);
+  function renderTrack(item) {
+    if (!item) {
+      document.getElementById('track-name').textContent = 'Not playing';
+      document.getElementById('track-artist').textContent = '—';
+      document.getElementById('album-art').style.display = 'none';
+      document.getElementById('album-art-placeholder').style.display = 'flex';
+      return;
     }
+    document.getElementById('track-name').textContent = item.name;
+    document.getElementById('track-artist').textContent = item.artists.map(a=>a.name).join(', ');
+    const img = item.album?.images?.[0]?.url;
+    if (img) {
+      document.getElementById('album-art').src = img;
+      document.getElementById('album-art').style.display = 'block';
+      document.getElementById('album-art-placeholder').style.display = 'none';
+    }
+  }
+
+  function renderControls(playing) {
+    isPlaying = playing;
+    document.getElementById('play-icon').style.display = playing ? 'none' : 'block';
+    document.getElementById('pause-icon').style.display = playing ? 'block' : 'none';
   }
 
   async function renderQueue() {
@@ -715,26 +683,40 @@
     const list = document.getElementById('queue-list');
     list.innerHTML = '';
     data.queue.slice(0, 4).forEach(item => {
-      const img = item.album.images[1]?.url || item.album.images[0].url;
+      const img = item.album?.images?.[1]?.url || item.album?.images?.[0]?.url || '';
       const div = document.createElement('div');
       div.className = 'queue-item';
-      div.innerHTML = `
-        <img src="${img}" alt="">
-        <div class="queue-item-info">
-          <div class="queue-item-name">${item.name}</div>
-          <div class="queue-item-artist">${item.artists[0].name}</div>
-        </div>`;
+      div.innerHTML = `<img src="${img}" alt=""><div class="queue-item-info"><div class="queue-item-name">${item.name}</div><div class="queue-item-artist">${item.artists?.map(a=>a.name).join(', ')||''}</div></div>`;
       list.appendChild(div);
     });
   }
 
+  async function pollPlayback() {
+    const data = await spotifyApi('GET', '/me/player?additional_types=track');
+    if (!data || !data.item) {
+      showNoPlayback();
+      return;
+    }
+    showPlayer();
+    renderTrack(data.item);
+    renderControls(data.is_playing);
+    currentProgress = data.progress_ms || 0;
+    currentDuration = data.item.duration_ms || 0;
+    document.getElementById('progress-bar-fill').style.width = (currentDuration > 0 ? currentProgress/currentDuration*100 : 0) + '%';
+    document.getElementById('prog-elapsed').textContent = fmtMs(currentProgress);
+    document.getElementById('prog-duration').textContent = fmtMs(currentDuration);
+  }
+
   function initPlayer() {
+    showPlayer();
     pollPlayback();
-    if (pollInterval) clearInterval(pollInterval);
-    pollInterval = setInterval(pollPlayback, 3000);
+    renderQueue();
+    pollInterval = setInterval(()=>{ pollPlayback(); renderQueue(); }, 5000);
+    progressInterval = setInterval(updateProgress, 1000);
   }
 
   function showLogin() {
+    clearIntervals();
     document.getElementById('spotify-login').style.display = 'flex';
     document.getElementById('spotify-player').classList.remove('visible');
     document.getElementById('no-playback').style.display = 'none';
@@ -747,40 +729,54 @@
   }
 
   function showNoPlayback() {
+    document.getElementById('spotify-login').style.display = 'none';
     document.getElementById('spotify-player').classList.remove('visible');
     document.getElementById('no-playback').style.display = 'flex';
   }
 
-  document.getElementById('login-btn').addEventListener('click', (e) => {
-    e.preventDefault();
-    startLogin();
-  });
+  function clearIntervals() {
+    if (pollInterval) clearInterval(pollInterval);
+    if (progressInterval) clearInterval(progressInterval);
+  }
 
+  /* Controls */
   document.getElementById('play-btn').addEventListener('click', async () => {
+    const token = await getToken();
+    if (!token) return;
     await spotifyApi('PUT', isPlaying ? '/me/player/pause' : '/me/player/play');
-    setTimeout(pollPlayback, 500);
+    setTimeout(pollPlayback, 300);
   });
 
   document.getElementById('next-btn').addEventListener('click', async () => {
     await spotifyApi('POST', '/me/player/next');
-    setTimeout(pollPlayback, 500);
+    setTimeout(()=>{ pollPlayback(); renderQueue(); }, 600);
   });
 
   document.getElementById('prev-btn').addEventListener('click', async () => {
     await spotifyApi('POST', '/me/player/previous');
-    setTimeout(pollPlayback, 500);
+    setTimeout(pollPlayback, 600);
   });
 
-  (async function boot() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
+  document.getElementById('login-btn').addEventListener('click', e => {
+    e.preventDefault();
+    startLogin();
+  });
 
+  /* ════════════════════════════════
+     BOOT — handle OAuth callback
+  ════════════════════════════════ */
+  (async function boot() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
     if (code) {
       await exchangeCode(code);
+      return;
+    }
+    const token = await getToken();
+    if (token) {
+      initPlayer();
     } else {
-      const token = await getToken();
-      if (token) initPlayer();
-      else showLogin();
+      showLogin();
     }
   })();
 </script>
