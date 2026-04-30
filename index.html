@@ -23,79 +23,87 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      padding: 24px 18px 18px;
-      gap: 12px;
+      padding: 20px 18px 16px;
+      gap: 10px;
     }
 
-    /* ── Clock ── */
+    /* ── Top bar: clock left, weather right ── */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 18px;
+      padding: 14px 20px;
+    }
+
     #clock-block {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
+      gap: 2px;
     }
 
     #time {
-      font-size: clamp(64px, 18vw, 110px);
+      font-size: clamp(48px, 13vw, 86px);
       font-weight: 200;
-      letter-spacing: -3px;
+      letter-spacing: -2px;
       color: #fff;
       line-height: 1;
     }
 
     #day {
-      font-size: clamp(15px, 3.5vw, 22px);
-      color: #666;
+      font-size: clamp(13px, 3vw, 18px);
+      color: #888;
       font-weight: 300;
       letter-spacing: 1px;
       text-transform: uppercase;
     }
 
     #date {
-      font-size: clamp(13px, 3vw, 17px);
+      font-size: clamp(12px, 2.5vw, 15px);
       color: #888;
       font-weight: 300;
     }
 
-    /* ── Weather ── */
-    #weather-strip {
+    /* ── Weather right side ── */
+    #weather-block {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      padding: 12px 18px;
-      background: #161616;
-      border: 1px solid #2a2a2a;
-      border-radius: 14px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
       flex-shrink: 0;
-      min-height: 58px;
     }
 
-    #weather-icon { font-size: 26px; line-height: 1; }
+    #weather-row1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-    #weather-main { display: flex; flex-direction: column; gap: 1px; }
+    #weather-icon { font-size: 28px; line-height: 1; }
 
     #weather-temp {
-      font-size: clamp(20px, 4.5vw, 26px);
-      font-weight: 300;
+      font-size: clamp(28px, 7vw, 42px);
+      font-weight: 200;
       color: #fff;
       line-height: 1;
     }
 
-    #weather-desc { font-size: 12px; color: #999; text-transform: capitalize; }
-
-    #weather-extra {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      border-left: 1px solid #2a2a2a;
-      padding-left: 16px;
-      font-size: 12px;
+    #weather-desc {
+      font-size: clamp(12px, 2.5vw, 14px);
       color: #999;
+      text-transform: capitalize;
+      text-align: right;
     }
 
-    #weather-loading { font-size: 13px; color: #888; }
+    #weather-extra {
+      font-size: clamp(11px, 2.2vw, 13px);
+      color: #999;
+      text-align: right;
+    }
 
     /* ── Divider ── */
     .divider {
@@ -118,7 +126,6 @@
       min-height: 0;
     }
 
-    /* Login state */
     #spotify-login {
       display: flex;
       flex-direction: column;
@@ -133,7 +140,7 @@
 
     #spotify-login p {
       font-size: 14px;
-      color: #444;
+      color: #555;
       text-align: center;
       line-height: 1.6;
     }
@@ -157,7 +164,6 @@
 
     #login-btn:active { background: #17a349; }
 
-    /* Player state */
     #spotify-player {
       display: none;
       flex-direction: column;
@@ -166,18 +172,17 @@
 
     #spotify-player.visible { display: flex; }
 
-    /* Album art + track info */
     #track-area {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 18px 20px 14px;
+      gap: 14px;
+      padding: 16px 18px 10px;
       flex-shrink: 0;
     }
 
     #album-art {
-      width: 64px;
-      height: 64px;
+      width: 72px;
+      height: 72px;
       border-radius: 8px;
       background: #1e1e1e;
       object-fit: cover;
@@ -185,8 +190,8 @@
     }
 
     #album-art-placeholder {
-      width: 64px;
-      height: 64px;
+      width: 72px;
+      height: 72px;
       border-radius: 8px;
       background: #1e1e1e;
       flex-shrink: 0;
@@ -198,7 +203,7 @@
     #track-info { flex: 1; min-width: 0; }
 
     #track-name {
-      font-size: clamp(15px, 3.5vw, 18px);
+      font-size: clamp(19px, 4.5vw, 24px);
       font-weight: 500;
       color: #fff;
       white-space: nowrap;
@@ -207,17 +212,43 @@
     }
 
     #track-artist {
-      font-size: clamp(12px, 2.8vw, 14px);
-      color: #666;
+      font-size: clamp(13px, 3vw, 16px);
+      color: #777;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-top: 3px;
+      margin-top: 4px;
     }
 
-    /* Progress bar */
+    /* Like button */
+    #like-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.1s;
+    }
+
+    #like-btn:active { background: #1e1e1e; }
+
+    #like-icon {
+      width: 32px;
+      height: 32px;
+      transition: fill 0.2s, stroke 0.2s;
+    }
+
+    #like-icon.liked { fill: #1DB954; stroke: #1DB954; }
+    #like-icon.unliked { fill: none; stroke: #777; stroke-width: 2; }
+
+    /* Progress */
     #progress-area {
-      padding: 0 20px 14px;
+      padding: 0 18px 12px;
       flex-shrink: 0;
     }
 
@@ -241,8 +272,8 @@
       display: flex;
       justify-content: space-between;
       margin-top: 6px;
-      font-size: 11px;
-      color: #3a3a3a;
+      font-size: 12px;
+      color: #888;
     }
 
     /* Controls */
@@ -250,15 +281,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0;
-      padding: 0 12px 18px;
+      padding: 0 12px 16px;
       flex-shrink: 0;
     }
 
     .ctrl-btn {
       background: none;
       border: none;
-      color: #888;
+      color: #ccc;
       cursor: pointer;
       padding: 12px 18px;
       border-radius: 12px;
@@ -273,21 +303,24 @@
     .ctrl-btn:active { background: #1e1e1e; color: #fff; }
 
     #play-btn {
-      color: #fff;
       background: #1DB954;
+      border: none;
       border-radius: 50%;
-      width: 64px;
-      height: 64px;
+      width: 68px;
+      height: 68px;
       flex: none;
-      padding: 0;
       margin: 0 8px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s;
     }
 
     #play-btn:active { background: #17a349; }
 
-    #play-btn svg, .ctrl-btn svg { display: block; }
-
-    /* Queue / Up next */
+    /* Queue */
     #queue-area {
       flex: 1;
       overflow-y: auto;
@@ -297,24 +330,23 @@
 
     #queue-label {
       font-size: 10px;
-      color: #333;
+      color: #444;
       text-transform: uppercase;
       letter-spacing: 1px;
-      padding: 10px 20px 6px;
+      padding: 10px 18px 6px;
     }
 
     .queue-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 8px 20px;
+      padding: 8px 18px;
     }
 
     .queue-item img {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 4px;
-      background: #1e1e1e;
       object-fit: cover;
       flex-shrink: 0;
     }
@@ -322,7 +354,7 @@
     .queue-item-info { flex: 1; min-width: 0; }
 
     .queue-item-name {
-      font-size: 13px;
+      font-size: 14px;
       color: #aaa;
       white-space: nowrap;
       overflow: hidden;
@@ -330,14 +362,13 @@
     }
 
     .queue-item-artist {
-      font-size: 11px;
-      color: #444;
+      font-size: 12px;
+      color: #555;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* Error / no playback */
     #no-playback {
       display: none;
       flex-direction: column;
@@ -361,21 +392,21 @@
 <body>
 <div id="app">
 
-  <div id="clock-block">
-    <div id="time">00:00</div>
-    <div id="day">Sunday</div>
-    <div id="date">27 April 2026</div>
-  </div>
-
-  <div id="weather-strip">
-    <span id="weather-loading">Fetching weather…</span>
+  <div id="top-bar">
+    <div id="clock-block">
+      <div id="time">00:00</div>
+      <div id="day">Sunday</div>
+      <div id="date">29 April 2026</div>
+    </div>
+    <div id="weather-block">
+      <span style="color:#555;font-size:13px">—</span>
+    </div>
   </div>
 
   <div class="divider"></div>
 
   <div id="spotify-panel">
 
-    <!-- Login -->
     <div id="spotify-login">
       <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
         <circle cx="24" cy="24" r="24" fill="#1DB954"/>
@@ -386,7 +417,6 @@
       <p>Connect Spotify to see what's playing and control your music.</p>
       <a id="login-btn" href="#">
         <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="24" fill="none"/>
           <path d="M14 21C19 18.5 29 18.5 34 21" stroke="#000" stroke-width="3" stroke-linecap="round"/>
           <path d="M15 25.5C20 23.5 28 23.5 33 25.5" stroke="#000" stroke-width="3" stroke-linecap="round"/>
           <path d="M16.5 30C21 28.5 27 28.5 31.5 30" stroke="#000" stroke-width="3" stroke-linecap="round"/>
@@ -395,7 +425,6 @@
       </a>
     </div>
 
-    <!-- Player -->
     <div id="spotify-player">
       <div id="track-area">
         <div id="album-art-placeholder">
@@ -409,12 +438,15 @@
           <div id="track-name">Not playing</div>
           <div id="track-artist">—</div>
         </div>
+        <button id="like-btn" aria-label="Like song">
+          <svg id="like-icon" class="unliked" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
       </div>
 
       <div id="progress-area">
-        <div id="progress-bar-bg">
-          <div id="progress-bar-fill"></div>
-        </div>
+        <div id="progress-bar-bg"><div id="progress-bar-fill"></div></div>
         <div id="progress-times">
           <span id="prog-elapsed">0:00</span>
           <span id="prog-duration">0:00</span>
@@ -422,24 +454,17 @@
       </div>
 
       <div id="controls">
-        <!-- Previous -->
         <button class="ctrl-btn" id="prev-btn" aria-label="Previous">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
           </svg>
         </button>
-        <!-- Play/Pause -->
         <button id="play-btn" aria-label="Play/Pause">
-          <svg id="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="white">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-          <svg id="pause-icon" width="28" height="28" viewBox="0 0 24 24" fill="white" style="display:none">
-            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-          </svg>
+          <svg id="play-icon" width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="pause-icon" width="30" height="30" viewBox="0 0 24 24" fill="white" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         </button>
-        <!-- Next -->
         <button class="ctrl-btn" id="next-btn" aria-label="Next">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/>
           </svg>
         </button>
@@ -451,7 +476,6 @@
       </div>
     </div>
 
-    <!-- No playback -->
     <div id="no-playback">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1.5"/>
@@ -466,14 +490,10 @@
 </div>
 
 <script>
-  /* ════════════════════════════════
-     CLOCK
-  ════════════════════════════════ */
+  /* ── CLOCK ── */
   function updateClock() {
     const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    document.getElementById('time').textContent = h + ':' + m;
+    document.getElementById('time').textContent = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
     const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     document.getElementById('day').textContent = days[now.getDay()];
@@ -482,302 +502,147 @@
   updateClock();
   setInterval(updateClock, 1000);
 
-  /* ════════════════════════════════
-     WEATHER
-  ════════════════════════════════ */
-  const WMO = {
-    0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
-    45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
-    61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',
-    75:'Heavy snow',80:'Light showers',81:'Showers',82:'Heavy showers',
-    95:'Thunderstorm',96:'Thunderstorm + hail',99:'Severe thunderstorm'
-  };
-  function wmoIcon(code, isDay) {
-    if (code===0) return isDay?'☀️':'🌙';
-    if (code<=2) return isDay?'🌤️':'🌥️';
-    if (code===3) return '☁️';
-    if (code<=48) return '🌫️';
-    if (code<=55) return '🌦️';
-    if (code<=65) return '🌧️';
-    if (code<=75) return '❄️';
-    if (code<=82) return '🌧️';
-    return '⛈️';
-  }
+  /* ── WEATHER ── */
+  const WMO = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Light showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm + hail',99:'Severe thunderstorm'};
+  function wmoIcon(c,d){if(c===0)return d?'☀️':'🌙';if(c<=2)return d?'🌤️':'🌥️';if(c===3)return'☁️';if(c<=48)return'🌫️';if(c<=55)return'🌦️';if(c<=65)return'🌧️';if(c<=75)return'❄️';if(c<=82)return'🌧️';return'⛈️';}
   function renderWeather(data) {
     const c = data.current;
-    const strip = document.getElementById('weather-strip');
-    strip.innerHTML = `
-      <span id="weather-icon">${wmoIcon(c.weather_code, c.is_day)}</span>
-      <div id="weather-main">
+    document.getElementById('weather-block').innerHTML = `
+      <div id="weather-row1">
+        <span id="weather-icon">${wmoIcon(c.weather_code, c.is_day)}</span>
         <span id="weather-temp">${Math.round(c.temperature_2m)}°C</span>
-        <span id="weather-desc">${WMO[c.weather_code]||'—'}</span>
       </div>
-      <div id="weather-extra">
-        <span>Feels like ${Math.round(c.apparent_temperature)}°C</span>
-        <span>Wind ${Math.round(c.wind_speed_10m)} km/h</span>
-      </div>`;
+      <span id="weather-desc">${WMO[c.weather_code]||'—'}</span>
+      <span id="weather-extra">Feels ${Math.round(c.apparent_temperature)}° · 💨 ${Math.round(c.wind_speed_10m)} km/h</span>`;
   }
   function fetchWeather(lat, lon) {
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&wind_speed_unit=kmh&timezone=auto`)
       .then(r=>r.json()).then(renderWeather)
-      .catch(()=>{ document.getElementById('weather-strip').innerHTML='<span id="weather-loading" style="color:#333">Weather unavailable</span>'; });
+      .catch(()=>{ document.getElementById('weather-block').innerHTML='<span style="color:#666;font-size:12px">No weather</span>'; });
   }
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      p=>fetchWeather(p.coords.latitude, p.coords.longitude),
-      ()=>fetchWeather(53.0793, 8.8017)
-    );
-  } else { fetchWeather(53.0793, 8.8017); }
+    navigator.geolocation.getCurrentPosition(p=>fetchWeather(p.coords.latitude,p.coords.longitude),()=>fetchWeather(53.0793,8.8017));
+  } else { fetchWeather(53.0793,8.8017); }
 
-  /* ════════════════════════════════
-     SPOTIFY AUTH (PKCE)
-  ════════════════════════════════ */
+  /* ── SPOTIFY AUTH (PKCE) ── */
   const CLIENT_ID = '79e6f32c86d54acb96f8b62437735e8a';
   const REDIRECT_URI = 'https://muanamama.github.io/driving-companion';
-  const SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing';
+  const SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing user-library-read user-library-modify';
 
-  function randomStr(len) {
-    const arr = new Uint8Array(len);
-    crypto.getRandomValues(arr);
-    return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('').slice(0, len);
-  }
-
-  async function sha256(plain) {
-    const enc = new TextEncoder().encode(plain);
-    const hash = await crypto.subtle.digest('SHA-256', enc);
-    return hash;
-  }
-
-  function base64urlencode(buf) {
-    return btoa(String.fromCharCode(...new Uint8Array(buf)))
-      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  }
+  function randomStr(len){const a=new Uint8Array(len);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('').slice(0,len);}
+  async function sha256(p){return await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p));}
+  function b64url(buf){return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 
   async function startLogin() {
     const verifier = randomStr(64);
-    const hashed = await sha256(verifier);
-    const challenge = base64urlencode(hashed);
+    const challenge = b64url(await sha256(verifier));
     localStorage.setItem('pkce_verifier', verifier);
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      redirect_uri: REDIRECT_URI,
-      code_challenge_method: 'S256',
-      code_challenge: challenge
-    });
-    window.location = 'https://accounts.spotify.com/authorize?' + params;
+    const params = new URLSearchParams({response_type:'code',client_id:CLIENT_ID,scope:SCOPES,redirect_uri:REDIRECT_URI,code_challenge_method:'S256',code_challenge:challenge});
+    window.location.href = 'https://accounts.spotify.com/authorize?' + params;
   }
 
   async function exchangeCode(code) {
-    const verifier = localStorage.getItem('pkce_verifier');
-    const res = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: REDIRECT_URI,
-        client_id: CLIENT_ID,
-        code_verifier: verifier
-      })
-    });
+    const res = await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:REDIRECT_URI,client_id:CLIENT_ID,code_verifier:localStorage.getItem('pkce_verifier')})});
     const data = await res.json();
-    if (data.access_token) {
-      saveTokens(data);
-      window.history.replaceState({}, '', REDIRECT_URI);
-      initPlayer();
-    }
+    if (data.access_token) { saveTokens(data); window.history.replaceState({}, '', REDIRECT_URI); initPlayer(); }
   }
 
   async function refreshToken() {
     const rt = localStorage.getItem('spotify_refresh');
     if (!rt) return null;
-    const res = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: rt,
-        client_id: CLIENT_ID
-      })
-    });
+    const res = await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',refresh_token:rt,client_id:CLIENT_ID})});
     const data = await res.json();
-    if (data.access_token) { saveTokens(data); return data.access_token; }
+    if (data.access_token){saveTokens(data);return data.access_token;}
     return null;
   }
 
-  function saveTokens(data) {
-    localStorage.setItem('spotify_token', data.access_token);
-    localStorage.setItem('spotify_expires', Date.now() + (data.expires_in - 60) * 1000);
-    if (data.refresh_token) localStorage.setItem('spotify_refresh', data.refresh_token);
-  }
+  function saveTokens(d){localStorage.setItem('spotify_token',d.access_token);localStorage.setItem('spotify_expires',Date.now()+(d.expires_in-60)*1000);if(d.refresh_token)localStorage.setItem('spotify_refresh',d.refresh_token);}
+  async function getToken(){const exp=parseInt(localStorage.getItem('spotify_expires')||'0');if(Date.now()<exp)return localStorage.getItem('spotify_token');return await refreshToken();}
 
-  async function getToken() {
-    const exp = parseInt(localStorage.getItem('spotify_expires') || '0');
-    if (Date.now() < exp) return localStorage.getItem('spotify_token');
-    return await refreshToken();
-  }
-
-  /* ════════════════════════════════
-     SPOTIFY PLAYER
-  ════════════════════════════════ */
-  let isPlaying = false;
-  let pollInterval = null;
-  let progressInterval = null;
-  let currentProgress = 0;
-  let currentDuration = 0;
+  /* ── PLAYER ── */
+  let isPlaying=false, isLiked=false, currentTrackId=null, pollInterval=null, progressInterval=null, currentProgress=0, currentDuration=0;
 
   async function spotifyApi(method, path, body) {
     const token = await getToken();
-    if (!token) { showLogin(); return null; }
-    const opts = { method, headers: { Authorization: 'Bearer ' + token } };
-    if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
-    const res = await fetch('https://api.spotify.com/v1' + path, opts);
-    if (res.status === 401) { showLogin(); return null; }
-    if (res.status === 204 || res.status === 202) return {};
-    if (!res.ok) return null;
+    if (!token){showLogin();return null;}
+    const opts={method,headers:{Authorization:'Bearer '+token}};
+    if(body!==undefined){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body);}
+    const res = await fetch('https://api.spotify.com/v1'+path,opts);
+    if(res.status===401){showLogin();return null;}
+    if(res.status===204||res.status===202)return{};
+    if(!res.ok)return null;
     return res.json().catch(()=>({}));
   }
 
-  function fmtMs(ms) {
-    const s = Math.floor(ms/1000);
-    return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+  function fmtMs(ms){const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+
+  function updateProgress(){if(!isPlaying)return;currentProgress=Math.min(currentProgress+1000,currentDuration);document.getElementById('progress-bar-fill').style.width=(currentDuration>0?currentProgress/currentDuration*100:0)+'%';document.getElementById('prog-elapsed').textContent=fmtMs(currentProgress);}
+
+  async function checkLiked(id){const d=await spotifyApi('GET',`/me/tracks/contains?ids=${id}`);if(d&&Array.isArray(d)){isLiked=d[0];updateLikeBtn();}}
+
+  function updateLikeBtn(){const i=document.getElementById('like-icon');i.classList.toggle('liked',isLiked);i.classList.toggle('unliked',!isLiked);}
+
+  function renderTrack(item){
+    if(!item){document.getElementById('track-name').textContent='Not playing';document.getElementById('track-artist').textContent='—';document.getElementById('album-art').style.display='none';document.getElementById('album-art-placeholder').style.display='flex';currentTrackId=null;return;}
+    document.getElementById('track-name').textContent=item.name;
+    document.getElementById('track-artist').textContent=item.artists.map(a=>a.name).join(', ');
+    const img=item.album?.images?.[0]?.url;
+    if(img){document.getElementById('album-art').src=img;document.getElementById('album-art').style.display='block';document.getElementById('album-art-placeholder').style.display='none';}
+    if(item.id!==currentTrackId){currentTrackId=item.id;checkLiked(item.id);}
   }
 
-  function updateProgress() {
-    if (!isPlaying) return;
-    currentProgress = Math.min(currentProgress + 1000, currentDuration);
-    const pct = currentDuration > 0 ? (currentProgress / currentDuration * 100) : 0;
-    document.getElementById('progress-bar-fill').style.width = pct + '%';
-    document.getElementById('prog-elapsed').textContent = fmtMs(currentProgress);
-  }
+  function renderControls(playing){isPlaying=playing;document.getElementById('play-icon').style.display=playing?'none':'block';document.getElementById('pause-icon').style.display=playing?'block':'none';}
 
-  function renderTrack(item) {
-    if (!item) {
-      document.getElementById('track-name').textContent = 'Not playing';
-      document.getElementById('track-artist').textContent = '—';
-      document.getElementById('album-art').style.display = 'none';
-      document.getElementById('album-art-placeholder').style.display = 'flex';
-      return;
-    }
-    document.getElementById('track-name').textContent = item.name;
-    document.getElementById('track-artist').textContent = item.artists.map(a=>a.name).join(', ');
-    const img = item.album?.images?.[0]?.url;
-    if (img) {
-      document.getElementById('album-art').src = img;
-      document.getElementById('album-art').style.display = 'block';
-      document.getElementById('album-art-placeholder').style.display = 'none';
-    }
-  }
-
-  function renderControls(playing) {
-    isPlaying = playing;
-    document.getElementById('play-icon').style.display = playing ? 'none' : 'block';
-    document.getElementById('pause-icon').style.display = playing ? 'block' : 'none';
-  }
-
-  async function renderQueue() {
-    const data = await spotifyApi('GET', '/me/player/queue');
-    if (!data || !data.queue) return;
-    const list = document.getElementById('queue-list');
-    list.innerHTML = '';
-    data.queue.slice(0, 4).forEach(item => {
-      const img = item.album?.images?.[1]?.url || item.album?.images?.[0]?.url || '';
-      const div = document.createElement('div');
-      div.className = 'queue-item';
-      div.innerHTML = `<img src="${img}" alt=""><div class="queue-item-info"><div class="queue-item-name">${item.name}</div><div class="queue-item-artist">${item.artists?.map(a=>a.name).join(', ')||''}</div></div>`;
+  async function renderQueue(){
+    const data=await spotifyApi('GET','/me/player/queue');
+    if(!data||!data.queue)return;
+    const list=document.getElementById('queue-list');
+    list.innerHTML='';
+    data.queue.slice(0,4).forEach(item=>{
+      const img=item.album?.images?.[1]?.url||item.album?.images?.[0]?.url||'';
+      const div=document.createElement('div');div.className='queue-item';
+      div.innerHTML=`<img src="${img}" alt=""><div class="queue-item-info"><div class="queue-item-name">${item.name}</div><div class="queue-item-artist">${item.artists?.map(a=>a.name).join(', ')||''}</div></div>`;
       list.appendChild(div);
     });
   }
 
-  async function pollPlayback() {
-    const data = await spotifyApi('GET', '/me/player?additional_types=track');
-    if (!data || !data.item) {
-      showNoPlayback();
-      return;
-    }
+  async function pollPlayback(){
+    const data=await spotifyApi('GET','/me/player?additional_types=track');
+    if(!data||!data.item){showNoPlayback();return;}
     showPlayer();
     renderTrack(data.item);
     renderControls(data.is_playing);
-    currentProgress = data.progress_ms || 0;
-    currentDuration = data.item.duration_ms || 0;
-    document.getElementById('progress-bar-fill').style.width = (currentDuration > 0 ? currentProgress/currentDuration*100 : 0) + '%';
-    document.getElementById('prog-elapsed').textContent = fmtMs(currentProgress);
-    document.getElementById('prog-duration').textContent = fmtMs(currentDuration);
+    currentProgress=data.progress_ms||0;
+    currentDuration=data.item.duration_ms||0;
+    document.getElementById('progress-bar-fill').style.width=(currentDuration>0?currentProgress/currentDuration*100:0)+'%';
+    document.getElementById('prog-elapsed').textContent=fmtMs(currentProgress);
+    document.getElementById('prog-duration').textContent=fmtMs(currentDuration);
   }
 
-  function initPlayer() {
-    showPlayer();
-    pollPlayback();
-    renderQueue();
-    pollInterval = setInterval(()=>{ pollPlayback(); renderQueue(); }, 5000);
-    progressInterval = setInterval(updateProgress, 1000);
-  }
+  function initPlayer(){showPlayer();pollPlayback();renderQueue();pollInterval=setInterval(()=>{pollPlayback();renderQueue();},5000);progressInterval=setInterval(updateProgress,1000);}
+  function clearIntervals(){if(pollInterval)clearInterval(pollInterval);if(progressInterval)clearInterval(progressInterval);}
+  function showLogin(){clearIntervals();document.getElementById('spotify-login').style.display='flex';document.getElementById('spotify-player').classList.remove('visible');document.getElementById('no-playback').style.display='none';}
+  function showPlayer(){document.getElementById('spotify-login').style.display='none';document.getElementById('spotify-player').classList.add('visible');document.getElementById('no-playback').style.display='none';}
+  function showNoPlayback(){document.getElementById('spotify-login').style.display='none';document.getElementById('spotify-player').classList.remove('visible');document.getElementById('no-playback').style.display='flex';}
 
-  function showLogin() {
-    clearIntervals();
-    document.getElementById('spotify-login').style.display = 'flex';
-    document.getElementById('spotify-player').classList.remove('visible');
-    document.getElementById('no-playback').style.display = 'none';
-  }
-
-  function showPlayer() {
-    document.getElementById('spotify-login').style.display = 'none';
-    document.getElementById('spotify-player').classList.add('visible');
-    document.getElementById('no-playback').style.display = 'none';
-  }
-
-  function showNoPlayback() {
-    document.getElementById('spotify-login').style.display = 'none';
-    document.getElementById('spotify-player').classList.remove('visible');
-    document.getElementById('no-playback').style.display = 'flex';
-  }
-
-  function clearIntervals() {
-    if (pollInterval) clearInterval(pollInterval);
-    if (progressInterval) clearInterval(progressInterval);
-  }
-
-  /* Controls */
-  document.getElementById('play-btn').addEventListener('click', async () => {
-    const token = await getToken();
-    if (!token) return;
-    await spotifyApi('PUT', isPlaying ? '/me/player/pause' : '/me/player/play');
-    setTimeout(pollPlayback, 300);
+  document.getElementById('play-btn').addEventListener('click',async()=>{const t=await getToken();if(!t)return;await spotifyApi('PUT',isPlaying?'/me/player/pause':'/me/player/play');setTimeout(pollPlayback,300);});
+  document.getElementById('next-btn').addEventListener('click',async()=>{await spotifyApi('POST','/me/player/next');setTimeout(()=>{pollPlayback();renderQueue();},600);});
+  document.getElementById('prev-btn').addEventListener('click',async()=>{await spotifyApi('POST','/me/player/previous');setTimeout(pollPlayback,600);});
+  document.getElementById('like-btn').addEventListener('click',async()=>{
+    if(!currentTrackId)return;
+    if(isLiked){await spotifyApi('DELETE',`/me/tracks?ids=${currentTrackId}`);isLiked=false;}
+    else{await spotifyApi('PUT',`/me/tracks?ids=${currentTrackId}`,[currentTrackId]);isLiked=true;}
+    updateLikeBtn();
   });
+  document.getElementById('login-btn').addEventListener('click',e=>{e.preventDefault();startLogin();});
 
-  document.getElementById('next-btn').addEventListener('click', async () => {
-    await spotifyApi('POST', '/me/player/next');
-    setTimeout(()=>{ pollPlayback(); renderQueue(); }, 600);
-  });
-
-  document.getElementById('prev-btn').addEventListener('click', async () => {
-    await spotifyApi('POST', '/me/player/previous');
-    setTimeout(pollPlayback, 600);
-  });
-
-  document.getElementById('login-btn').addEventListener('click', e => {
-    e.preventDefault();
-    startLogin();
-  });
-
-  /* ════════════════════════════════
-     BOOT — handle OAuth callback
-  ════════════════════════════════ */
-  (async function boot() {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    if (code) {
-      await exchangeCode(code);
-      return;
-    }
-    const token = await getToken();
-    if (token) {
-      initPlayer();
-    } else {
-      showLogin();
-    }
+  /* ── BOOT ── */
+  (async function boot(){
+    const params=new URLSearchParams(window.location.search);
+    const code=params.get('code');
+    if(code){await exchangeCode(code);return;}
+    const token=await getToken();
+    if(token){initPlayer();}else{showLogin();}
   })();
 </script>
 </body>
