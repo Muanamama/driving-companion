@@ -55,16 +55,16 @@
     }
 
     #day {
-      font-size: clamp(13px, 3vw, 18px);
-      color: #888;
+      font-size: clamp(15px, 3.5vw, 22px);
+      color: #bbb;
       font-weight: 300;
       letter-spacing: 1px;
       text-transform: uppercase;
     }
 
     #date {
-      font-size: clamp(12px, 2.5vw, 15px);
-      color: #888;
+      font-size: clamp(14px, 3vw, 18px);
+      color: #bbb;
       font-weight: 300;
     }
 
@@ -93,15 +93,21 @@
     }
 
     #weather-desc {
-      font-size: clamp(12px, 2.5vw, 14px);
-      color: #999;
+      font-size: clamp(14px, 3vw, 17px);
+      color: #ccc;
       text-transform: capitalize;
       text-align: right;
     }
 
     #weather-extra {
-      font-size: clamp(11px, 2.2vw, 13px);
-      color: #999;
+      font-size: clamp(13px, 2.8vw, 16px);
+      color: #ccc;
+      text-align: right;
+    }
+
+    #weather-location {
+      font-size: clamp(12px, 2.5vw, 14px);
+      color: #888;
       text-align: right;
     }
 
@@ -212,8 +218,8 @@
     }
 
     #track-artist {
-      font-size: clamp(13px, 3vw, 16px);
-      color: #777;
+      font-size: clamp(15px, 3.5vw, 19px);
+      color: #bbb;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -455,7 +461,7 @@
 
       <div id="controls">
         <button class="ctrl-btn" id="prev-btn" aria-label="Previous">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
           </svg>
         </button>
@@ -464,7 +470,7 @@
           <svg id="pause-icon" width="30" height="30" viewBox="0 0 24 24" fill="white" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         </button>
         <button class="ctrl-btn" id="next-btn" aria-label="Next">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/>
           </svg>
         </button>
@@ -505,24 +511,46 @@
   /* ── WEATHER ── */
   const WMO = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Light showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm + hail',99:'Severe thunderstorm'};
   function wmoIcon(c,d){if(c===0)return d?'☀️':'🌙';if(c<=2)return d?'🌤️':'🌥️';if(c===3)return'☁️';if(c<=48)return'🌫️';if(c<=55)return'🌦️';if(c<=65)return'🌧️';if(c<=75)return'❄️';if(c<=82)return'🌧️';return'⛈️';}
-  function renderWeather(data) {
-    const c = data.current;
-    document.getElementById('weather-block').innerHTML = `
-      <div id="weather-row1">
-        <span id="weather-icon">${wmoIcon(c.weather_code, c.is_day)}</span>
-        <span id="weather-temp">${Math.round(c.temperature_2m)}°C</span>
-      </div>
-      <span id="weather-desc">${WMO[c.weather_code]||'—'}</span>
-      <span id="weather-extra">Feels ${Math.round(c.apparent_temperature)}° · 💨 ${Math.round(c.wind_speed_10m)} km/h</span>`;
+
+  async function getLocationName(lat, lon) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+      const data = await res.json();
+      return data.address?.city || data.address?.town || data.address?.village || data.address?.suburb || data.address?.county || '';
+    } catch { return ''; }
   }
-  function fetchWeather(lat, lon) {
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&wind_speed_unit=kmh&timezone=auto`)
-      .then(r=>r.json()).then(renderWeather)
-      .catch(()=>{ document.getElementById('weather-block').innerHTML='<span style="color:#666;font-size:12px">No weather</span>'; });
+
+  async function fetchWeather(lat, lon) {
+    try {
+      const [weatherRes, locationName] = await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&wind_speed_unit=kmh&timezone=auto`).then(r=>r.json()),
+        getLocationName(lat, lon)
+      ]);
+      const c = weatherRes.current;
+      document.getElementById('weather-block').innerHTML = `
+        <div id="weather-row1">
+          <span id="weather-icon">${wmoIcon(c.weather_code, c.is_day)}</span>
+          <span id="weather-temp">${Math.round(c.temperature_2m)}°C</span>
+        </div>
+        <span id="weather-desc">${WMO[c.weather_code]||'—'}</span>
+        <span id="weather-extra">Feels ${Math.round(c.apparent_temperature)}° · 💨 ${Math.round(c.wind_speed_10m)} km/h</span>
+        ${locationName ? `<span id="weather-location">📍 ${locationName}</span>` : ''}`;
+    } catch {
+      document.getElementById('weather-block').innerHTML='<span style="color:#666;font-size:12px">No weather</span>';
+    }
   }
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(p=>fetchWeather(p.coords.latitude,p.coords.longitude),()=>fetchWeather(53.0793,8.8017));
-  } else { fetchWeather(53.0793,8.8017); }
+
+  function refreshWeather() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        p => fetchWeather(p.coords.latitude, p.coords.longitude),
+        () => fetchWeather(53.0793, 8.8017)
+      );
+    } else { fetchWeather(53.0793, 8.8017); }
+  }
+
+  refreshWeather();
+  setInterval(refreshWeather, 7 * 60 * 1000); // refresh every 7 minutes
 
   /* ── SPOTIFY AUTH (PKCE) ── */
   const CLIENT_ID = '79e6f32c86d54acb96f8b62437735e8a';
