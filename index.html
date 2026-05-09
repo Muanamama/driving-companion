@@ -433,6 +433,28 @@
 
     #no-playback p { font-size: 14px; color: #444; text-align: center; line-height: 1.6; }
 
+    #no-playback-hint { font-size: 12px; color: #333; margin-top: 4px; }
+
+    #open-spotify-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1DB954;
+      color: #000;
+      border: none;
+      border-radius: 50px;
+      padding: 16px 32px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+      margin-top: 8px;
+    }
+
+    #open-spotify-btn:active { background: #17a349; }
+
     #footer {
       font-size: 11px;
       color: #1e1e1e;
@@ -492,8 +514,8 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <span class="stat-value" id="stat-battery">—</span>
-          <span class="stat-label">Battery</span>
+          <span class="stat-value" id="stat-distance">0.0</span>
+          <span class="stat-label">km</span>
         </div>
       </div>
 
@@ -552,7 +574,16 @@
         <circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1.5"/>
         <path d="M10 9l5 3-5 3V9z" fill="#333"/>
       </svg>
-      <p>Open Spotify on your device and start playing something.</p>
+      <p>No Spotify session detected.</p>
+      <a id="open-spotify-btn" href="spotify:" onclick="setTimeout(()=>{ pollPlayback(); renderQueue(); }, 4000);">
+        <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
+          <path d="M14 21C19 18.5 29 18.5 34 21" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+          <path d="M15 25.5C20 23.5 28 23.5 33 25.5" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+          <path d="M16.5 30C21 28.5 27 28.5 31.5 30" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        Open Spotify
+      </a>
+      <p id="no-playback-hint">After Spotify starts playing, this will update automatically.</p>
     </div>
 
   </div>
@@ -634,31 +665,39 @@
     }, 1000);
   }
 
-  // Speed via GPS
+  // Speed and distance via GPS
+  let lastPos = null;
+  let totalDistance = 0; // km
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(pos => {
       const speed = pos.coords.speed;
       const kmh = speed != null && speed >= 0 ? Math.round(speed * 3.6) : 0;
       document.getElementById('stat-speed').textContent = kmh;
-      if (kmh > 2) startDriveTimer(); // start timer once moving
+      if (kmh > 2) startDriveTimer();
+
+      // Distance
+      if (lastPos) {
+        const d = haversine(lastPos.latitude, lastPos.longitude, pos.coords.latitude, pos.coords.longitude);
+        if (d < 0.5) { // ignore GPS jumps > 500m
+          totalDistance += d;
+          document.getElementById('stat-distance').textContent =
+            totalDistance < 10 ? totalDistance.toFixed(1) : Math.round(totalDistance);
+        }
+      }
+      lastPos = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
     }, null, { enableHighAccuracy: true, maximumAge: 2000, timeout: 5000 });
   }
-
-  /* ── BATTERY ── */
-  async function initBattery() {
-    if (!navigator.getBattery) return;
-    const battery = await navigator.getBattery();
-    function updateBattery() {
-      const pct = Math.round(battery.level * 100);
-      const charging = battery.charging;
-      document.getElementById('stat-battery').textContent = pct + '%' + (charging ? ' ⚡' : '');
-    }
-    updateBattery();
-    battery.addEventListener('levelchange', updateBattery);
-    battery.addEventListener('chargingchange', updateBattery);
-  }
-  initBattery();
-
   /* ── SPOTIFY AUTH (PKCE) ── */
   const CLIENT_ID = '79e6f32c86d54acb96f8b62437735e8a';
   const REDIRECT_URI = 'https://muanamama.github.io/driving-companion';
