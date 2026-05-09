@@ -47,7 +47,7 @@
     }
 
     #time {
-      font-size: clamp(48px, 13vw, 86px);
+      font-size: clamp(40px, 10vw, 70px);
       font-weight: 200;
       letter-spacing: -2px;
       color: #fff;
@@ -55,7 +55,7 @@
     }
 
     #day {
-      font-size: clamp(15px, 3.5vw, 22px);
+      font-size: clamp(13px, 2.8vw, 18px);
       color: #bbb;
       font-weight: 300;
       letter-spacing: 1px;
@@ -63,7 +63,7 @@
     }
 
     #date {
-      font-size: clamp(14px, 3vw, 18px);
+      font-size: clamp(12px, 2.5vw, 15px);
       color: #bbb;
       font-weight: 300;
     }
@@ -83,30 +83,30 @@
       gap: 8px;
     }
 
-    #weather-icon { font-size: 28px; line-height: 1; }
+    #weather-icon { font-size: 22px; line-height: 1; }
 
     #weather-temp {
-      font-size: clamp(28px, 7vw, 42px);
+      font-size: clamp(22px, 5.5vw, 34px);
       font-weight: 200;
       color: #fff;
       line-height: 1;
     }
 
     #weather-desc {
-      font-size: clamp(14px, 3vw, 17px);
+      font-size: clamp(12px, 2.5vw, 14px);
       color: #ccc;
       text-transform: capitalize;
       text-align: right;
     }
 
     #weather-extra {
-      font-size: clamp(13px, 2.8vw, 16px);
+      font-size: clamp(11px, 2.2vw, 13px);
       color: #ccc;
       text-align: right;
     }
 
     #weather-location {
-      font-size: clamp(15px, 3.5vw, 19px);
+      font-size: clamp(11px, 2.2vw, 13px);
       color: #888;
       text-align: right;
     }
@@ -478,24 +478,6 @@
     </div>
 
     <div id="spotify-player">
-      <div id="track-area">
-        <div id="album-art-placeholder">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1.5"/>
-            <circle cx="12" cy="12" r="3" stroke="#333" stroke-width="1.5"/>
-          </svg>
-        </div>
-        <img id="album-art" style="display:none" alt="Album art"/>
-        <div id="track-info">
-          <div id="track-name">Not playing</div>
-          <div id="track-artist">—</div>
-        </div>
-        <button id="like-btn" aria-label="Like song">
-          <svg id="like-icon" class="unliked" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-        </button>
-      </div>
 
       <!-- Stats bar -->
       <div id="stats-bar">
@@ -513,6 +495,25 @@
           <span class="stat-value" id="stat-battery">—</span>
           <span class="stat-label">Battery</span>
         </div>
+      </div>
+
+      <div id="track-area">
+        <div id="album-art-placeholder">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3" stroke="#333" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <img id="album-art" style="display:none" alt="Album art"/>
+        <div id="track-info">
+          <div id="track-name">Not playing</div>
+          <div id="track-artist">—</div>
+        </div>
+        <button id="like-btn" aria-label="Like song">
+          <svg id="like-icon" class="unliked" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
       </div>
 
       <div id="progress-area">
