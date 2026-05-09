@@ -106,7 +106,7 @@
     }
 
     #weather-location {
-      font-size: clamp(12px, 2.5vw, 14px);
+      font-size: clamp(15px, 3.5vw, 19px);
       color: #888;
       text-align: right;
     }
@@ -278,7 +278,7 @@
       display: flex;
       justify-content: space-between;
       margin-top: 6px;
-      font-size: 12px;
+      font-size: clamp(15px, 3.5vw, 19px);
       color: #888;
     }
 
@@ -335,8 +335,8 @@
     }
 
     #queue-label {
-      font-size: 10px;
-      color: #444;
+      font-size: clamp(15px, 3.5vw, 19px);
+      color: #666;
       text-transform: uppercase;
       letter-spacing: 1px;
       padding: 10px 18px 6px;
@@ -360,7 +360,7 @@
     .queue-item-info { flex: 1; min-width: 0; }
 
     .queue-item-name {
-      font-size: 14px;
+      font-size: clamp(15px, 3.5vw, 19px);
       color: #aaa;
       white-space: nowrap;
       overflow: hidden;
@@ -368,14 +368,60 @@
     }
 
     .queue-item-artist {
-      font-size: 12px;
-      color: #555;
+      font-size: clamp(15px, 3.5vw, 19px);
+      color: #666;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    #no-playback {
+    /* ── Trip stats + Battery ── */
+    #stats-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 10px 18px;
+      border-bottom: 1px solid #1a1a1a;
+      flex-shrink: 0;
+      gap: 8px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: clamp(17px, 4vw, 22px);
+      font-weight: 300;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: clamp(11px, 2.5vw, 13px);
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 32px;
+      background: #222;
+      flex-shrink: 0;
+    }
+
+    /* Queue items tappable */
+    .queue-item {
+      cursor: pointer;
+      transition: background 0.1s;
+      border-radius: 8px;
+    }
+    .queue-item:active { background: #1a1a1a; }
       display: none;
       flex-direction: column;
       align-items: center;
@@ -449,6 +495,24 @@
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </button>
+      </div>
+
+      <!-- Stats bar -->
+      <div id="stats-bar">
+        <div class="stat-item">
+          <span class="stat-value" id="stat-speed">0</span>
+          <span class="stat-label">km/h</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-time">0:00</span>
+          <span class="stat-label">Drive time</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-battery">—</span>
+          <span class="stat-label">Battery</span>
+        </div>
       </div>
 
       <div id="progress-area">
@@ -552,6 +616,48 @@
   refreshWeather();
   setInterval(refreshWeather, 7 * 60 * 1000); // refresh every 7 minutes
 
+  /* ── TRIP STATS ── */
+  let driveStartTime = null;
+  let driveTimerInterval = null;
+
+  function startDriveTimer() {
+    if (driveStartTime) return; // already running
+    driveStartTime = Date.now();
+    driveTimerInterval = setInterval(() => {
+      const elapsed = Date.now() - driveStartTime;
+      const h = Math.floor(elapsed / 3600000);
+      const m = Math.floor((elapsed % 3600000) / 60000);
+      const s = Math.floor((elapsed % 60000) / 1000);
+      document.getElementById('stat-time').textContent =
+        h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+  }
+
+  // Speed via GPS
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(pos => {
+      const speed = pos.coords.speed;
+      const kmh = speed != null && speed >= 0 ? Math.round(speed * 3.6) : 0;
+      document.getElementById('stat-speed').textContent = kmh;
+      if (kmh > 2) startDriveTimer(); // start timer once moving
+    }, null, { enableHighAccuracy: true, maximumAge: 2000, timeout: 5000 });
+  }
+
+  /* ── BATTERY ── */
+  async function initBattery() {
+    if (!navigator.getBattery) return;
+    const battery = await navigator.getBattery();
+    function updateBattery() {
+      const pct = Math.round(battery.level * 100);
+      const charging = battery.charging;
+      document.getElementById('stat-battery').textContent = pct + '%' + (charging ? ' ⚡' : '');
+    }
+    updateBattery();
+    battery.addEventListener('levelchange', updateBattery);
+    battery.addEventListener('chargingchange', updateBattery);
+  }
+  initBattery();
+
   /* ── SPOTIFY AUTH (PKCE) ── */
   const CLIENT_ID = '79e6f32c86d54acb96f8b62437735e8a';
   const REDIRECT_URI = 'https://muanamama.github.io/driving-companion';
@@ -606,30 +712,63 @@
 
   function updateProgress(){if(!isPlaying)return;currentProgress=Math.min(currentProgress+1000,currentDuration);document.getElementById('progress-bar-fill').style.width=(currentDuration>0?currentProgress/currentDuration*100:0)+'%';document.getElementById('prog-elapsed').textContent=fmtMs(currentProgress);}
 
-  async function checkLiked(id){const d=await spotifyApi('GET',`/me/tracks/contains?ids=${id}`);if(d&&Array.isArray(d)){isLiked=d[0];updateLikeBtn();}}
-
-  function updateLikeBtn(){const i=document.getElementById('like-icon');i.classList.toggle('liked',isLiked);i.classList.toggle('unliked',!isLiked);}
-
-  function renderTrack(item){
-    if(!item){document.getElementById('track-name').textContent='Not playing';document.getElementById('track-artist').textContent='—';document.getElementById('album-art').style.display='none';document.getElementById('album-art-placeholder').style.display='flex';currentTrackId=null;return;}
-    document.getElementById('track-name').textContent=item.name;
-    document.getElementById('track-artist').textContent=item.artists.map(a=>a.name).join(', ');
-    const img=item.album?.images?.[0]?.url;
-    if(img){document.getElementById('album-art').src=img;document.getElementById('album-art').style.display='block';document.getElementById('album-art-placeholder').style.display='none';}
-    if(item.id!==currentTrackId){currentTrackId=item.id;checkLiked(item.id);}
+  async function checkLiked(id) {
+    const d = await spotifyApi('GET', `/me/tracks/contains?ids=${id}`);
+    if (d && Array.isArray(d)) { isLiked = d[0]; updateLikeBtn(); }
   }
 
-  function renderControls(playing){isPlaying=playing;document.getElementById('play-icon').style.display=playing?'none':'block';document.getElementById('pause-icon').style.display=playing?'block':'none';}
+  function updateLikeBtn() {
+    const i = document.getElementById('like-icon');
+    i.classList.toggle('liked', isLiked);
+    i.classList.toggle('unliked', !isLiked);
+  }
+
+  function renderTrack(item) {
+    if (!item) {
+      document.getElementById('track-name').textContent = 'Not playing';
+      document.getElementById('track-artist').textContent = '—';
+      document.getElementById('album-art').style.display = 'none';
+      document.getElementById('album-art-placeholder').style.display = 'flex';
+      currentTrackId = null;
+      return;
+    }
+    document.getElementById('track-name').textContent = item.name;
+    document.getElementById('track-artist').textContent = item.artists.map(a => a.name).join(', ');
+    const img = item.album?.images?.[0]?.url;
+    if (img) {
+      document.getElementById('album-art').src = img;
+      document.getElementById('album-art').style.display = 'block';
+      document.getElementById('album-art-placeholder').style.display = 'none';
+    }
+    if (item.id !== currentTrackId) { currentTrackId = item.id; checkLiked(item.id); }
+  }
+
+  function renderControls(playing) {
+    isPlaying = playing;
+    document.getElementById('play-icon').style.display = playing ? 'none' : 'block';
+    document.getElementById('pause-icon').style.display = playing ? 'block' : 'none';
+  }
 
   async function renderQueue(){
     const data=await spotifyApi('GET','/me/player/queue');
     if(!data||!data.queue)return;
     const list=document.getElementById('queue-list');
     list.innerHTML='';
-    data.queue.slice(0,4).forEach(item=>{
+    // Store queue URIs for tap-to-play (skip forward n times)
+    const queueItems = data.queue.slice(0,4);
+    queueItems.forEach((item, index)=>{
       const img=item.album?.images?.[1]?.url||item.album?.images?.[0]?.url||'';
-      const div=document.createElement('div');div.className='queue-item';
+      const div=document.createElement('div');
+      div.className='queue-item';
       div.innerHTML=`<img src="${img}" alt=""><div class="queue-item-info"><div class="queue-item-name">${item.name}</div><div class="queue-item-artist">${item.artists?.map(a=>a.name).join(', ')||''}</div></div>`;
+      // Tap to play: skip forward (index+1) times
+      div.addEventListener('click', async () => {
+        for (let i = 0; i <= index; i++) {
+          await spotifyApi('POST', '/me/player/next');
+          if (i < index) await new Promise(r => setTimeout(r, 300));
+        }
+        setTimeout(() => { pollPlayback(); renderQueue(); }, 700);
+      });
       list.appendChild(div);
     });
   }
